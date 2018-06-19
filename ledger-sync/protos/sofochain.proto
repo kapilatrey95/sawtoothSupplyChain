@@ -1,0 +1,174 @@
+syntax = "proto3";
+package sofochain;
+
+//version- 1.0
+
+message Product {
+    optional string productName = 1;
+    optional string oemProductId = 2;
+    optional string description = 3;
+    repeated string skusNumbers = 4;    
+}
+
+message Sku {
+    optional string oemSkuId=1;
+    optional string skuName=2;
+    optional string size=3;
+    optional Product Product=4;
+    optional string unitCost=5;
+}
+
+message Batch {
+    optional string batchNo=1;
+    repeated string smartCodeAddresses=2;
+    optional int32 batchQuantity=3;
+    optional Sku Sku=4;
+    optional string manufactureDate=5;
+    optional string expiryDate=6;
+    repeated string schemeApplicableFor=7;
+}
+
+
+message Unit {
+    optional string manufactureDate=1;
+    optional string expiryDate=2;
+    optional Sku sku=3;
+    optional string batchNo=4;
+    optional string manufacturedBy=5;
+    repeated string schemeApplicableFor=6;
+    optional string documentNumber=7;
+    optional string warrantyNo=8;
+    repeated string docHashes=9;
+    optional string customerMobile=10;
+} 
+
+message Package {
+	optional string   status=1;
+	optional string   packagedBy=2;
+	optional string   documentNumber=3;
+	optional string   logisticProvider=4;
+	optional string   transportReference=5;
+	optional string   dateOfPackage=6;
+	repeated string schemeApplicableFor=7;
+}
+
+message Location {
+    optional float latitude=1;
+    optional float longitude=2;
+    optional string placeAddress=3; 
+}
+
+
+message Account {
+	optional string address=1;
+	optional string name=2;
+	optional Location placeAddress=3;
+	optional string status=4;
+	repeated int32 ProductCount=5;
+	repeated int32 SkuCount=6;
+	optional string type=7;
+	optional int32 unitsPassedCount=8;
+	optional float payoutPending=9;
+    optional int32 batchCount=10;
+    optional int32 unitStock=11;
+    optional int32 cartonStock=12;
+    optional int32 containerStock=13;
+    optional int32 docCount=14;
+    optional int32 sellUnitCount=15;
+    optional int32 sellCartonCount=16;
+    optional int32 slaCount=17;
+}
+
+message Scheme {
+    message Tenure {
+        optional string startDate=1;
+        optional string endData=2;
+    }
+
+    message Slab {
+        optional float payout=1;
+        optional int32 startLimit=2;
+        optional int32 endLimit=3;
+    }
+
+    optional string schemeId=1;
+    optional string name=2;
+    optional Tenure tenure=3;
+    repeated Slab slabs=4;
+    optional string payoutType=5;
+    optional string sizeType=4;
+    repeated string applicableFor
+
+}
+
+message Sla {
+    message Temperature {
+        optional float upperlimit=1;
+        optional float lowerlimit=2;
+    }
+    message Humidity {
+        optional float upperlimit=1;
+        optional float lowerlimit=2; 
+    }
+    message Violation {
+        optional int32 lowerlimit=1;
+        optional int32 upperlimit=2;
+    }
+    optional string id=1;
+    optional string name=2;
+    optional string date=3;
+    optional Temperature temperature=4;
+    optional Humidity humidity=5;
+    repeated Violation violations=6;
+
+
+}
+
+message IOTDataFeed {
+    message Location {
+        optional float latitude=1;
+        optional float longitude=2;
+    }
+    optional string transactionId=1;
+    optional string timestamp=2;
+    optional float temperatureInput=3;
+    optional float humidityInput=4;
+    optonal Location location=5;
+    optional bool redFlag=6;
+    optional string message=7;
+}
+
+message GoodsTX {
+
+    enum Status {
+        INTRANSIT = 0;
+        COMPLETED = 1;
+        REJECTED = 2;
+    }
+
+    meesage Participant {
+        optional float latitude=1;
+        optional float longitude=2;
+        optional string address=3;
+        optional string username=4;
+        optional string organizationName=5; 
+    } 
+
+    optional string documentId=1;
+    optional string type=2;
+    repeated string cartonList=3;
+    optional string containerId=4;
+    repeated string unitList=5;
+    optional string transportReference=6;
+    optional Participant logistics=7;
+    optional string firstSealNumber=8;
+    optional string secondSealNumber=9;
+    optional Participant from=10;
+    optional Participant to=11;
+    optional Status status=12 [default = INTRANSIT]; 
+    optional Sla sla=13;
+    optional int32 redFlagCounts=14;
+    repeated IOTDataFeed iot_Feeds=15;
+    optional float penalty=16; 
+
+}

@@ -2,7 +2,10 @@
 "db_host":"localhost",
 "db_user":"root",
 "db_password":"root",
-"db_name":"ledger_sync"
+"db_name":"ledger_sync",
+"RESTapiUrl":"http://localhost:8024",
+"PREFIX":"3400de",
+"VALIDATOR_URL":"tcp://localhost:4004"
 
 
 }

@@ -11,12 +11,43 @@ const {
 } = require('sawtooth-sdk/protobuf')
 
 const deltas = require('./deltas')
-const config = require('../../config')
+const config = require('../../config.json')
 
 const PREFIX = config.PREFIX
+console.log("PREFIX",PREFIX)
 const NULL_BLOCK_ID = '0000000000000000'
 const VALIDATOR_URL = config.VALIDATOR_URL
 const stream = new Stream(VALIDATOR_URL)
+
+
+
+// Parse Block Commit Event
+const getBlock = events => {
+  const block = _.chain(events)
+    .find(e => e.eventType === 'sawtooth/block-commit')
+    .get('attributes')
+    .map(a => [a.key, a.value])
+    .fromPairs()
+    .value()
+
+  return {
+    blockNum: parseInt(block.block_num),
+    blockId: block.block_id,
+    stateRootHash: block.state_root_hash
+  }
+}
+
+
+// Parse State Delta Event
+const getChanges = events => {
+  const event = events.find(e => e.eventType === 'sawtooth/state-delta')
+  if (!event) return []
+
+  const changeList = StateChangeList.decode(event.data)
+  return changeList.stateChanges
+    .filter(change => change.address.slice(0, 6) === PREFIX)
+}
+
 
 
 
@@ -31,7 +62,41 @@ const handleEvent = msg => {
     }
   }
 
+// Send delta event subscription request to validator
+const subscribe = () => {
+  const blockSub = EventSubscription.create({
+    eventType: 'sawtooth/block-commit'
+  })
+  const deltaSub = EventSubscription.create({
+    eventType: 'sawtooth/state-delta',
+    filters: [createRegexFilter(`^${PREFIX}.*`)]
+  })
 
+  return stream.send(
+    Message.MessageType.CLIENT_EVENTS_SUBSCRIBE_REQUEST,
+    ClientEventsSubscribeRequest.encode({
+      lastKnownBlockIds: [NULL_BLOCK_ID],
+      subscriptions: [blockSub, deltaSub]
+    }).finish()
+  )
+    .then(response => ClientEventsSubscribeResponse.decode(response))
+    .then(decoded => {
+      const status = _.findKey(ClientEventsSubscribeResponse.Status,
+                               val => val === decoded.status)
+      if (status !== 'OK') {
+        throw new Error(`Validator responded with status "${status}"`)
+      }
+    })
+}
+
+const createRegexFilter = (regexExpression) => {
+//`^${PREFIX}.*`
+ return EventFilter.create({
+    key: 'address',
+    matchString: regexExpression,
+    filterType: EventFilter.FilterType.REGEX_ANY
+  })
+}
 
 const start = () => {
     return new Promise(resolve => {

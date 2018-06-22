@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mysql": "^2.15.0"
+    "lodash": "^4.17.10",
+    "mysql": "^2.15.0",
+    "sawtooth-sdk": "^1.0.4"
   }
 }

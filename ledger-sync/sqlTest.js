@@ -16,7 +16,7 @@ connection.connect(function(err) {
       console.error('error connecting: ' + err.stack);
      reject({"success":false,"message":err})
     }
-    var sql = "CREATE TABLE blocks (blockId VARCHAR(255),blockNum int, stateRootHash VARCHAR(255))";   // updated now
+    var sql = "CREATE TABLE IF NOT EXISTS blocks (blockId VARCHAR(255),blockNum int, stateRootHash VARCHAR(255))";   // updated now
         connection.query(sql, function (err, result) {
         if (err){ 
           console.log(err)
@@ -34,12 +34,19 @@ connection.connect(function(err) {
 
 })
 
+return promise
+
 
 }
 
 connect().then(response=>{
     if(response.success){
-        
+       var query = "SELECT * FROM blocks WHERE blockNum = 100"
+       connection.query(query, function (err, result) {
+        console.log(err)
+        console.log(result)
+
+       })
 
 
 
